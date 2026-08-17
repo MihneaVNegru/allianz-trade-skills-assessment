@@ -11,14 +11,16 @@
 
 I'd split APIs by who uses them, and keep the backends as they are:
 
-- **Internal-only:** private API Gateway + `execute-api` VPC endpoint (`aws:SourceVpce` in the resource policy)
+- **Internal-only:** private API Gateway + `execute-api` VPC endpoint (`aws:SourceVpce` in the resource policy). Reachable from our VPCs, and from on-prem over VPN / Direct Connect into that PrivateLink path.
 - **Public + internal:** CloudFront for external users; private endpoint + private DNS for internal users (same hostname if possible, skip CloudFront)
 
 That removes the internet hairpin for internal traffic with little app change.
 
 ## 3. Routing CloudFront to multiple API Gateways
 
-I'd use multiple origins with path-based behaviours:
+In the current setup, CloudFront is what splits traffic across the team API Gateways — not a single Gateway routing everything.
+
+That means one origin per API Gateway, plus path-based behaviours:
 
 - `/policies/*`, `/claims/*`, `/quotes/*` → each team's API Gateway
 - More specific paths first, default last

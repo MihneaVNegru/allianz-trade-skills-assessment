@@ -7,6 +7,8 @@ These are BYOK keys (`Origin = EXTERNAL`), so AWS does not auto-rotate them. I g
 For symmetric keys I use **on-demand rotation**: key ARN and alias stay the same, apps don't change, and old data stays readable under previous material. No bulk re-encryption needed.
 
 Things to watch:
+- Keys live in the Security account and are used from Dev/Prod — a bad cutover hits many consumers
+- Many keys to rotate (env × service), so this needs a repeatable process, not one-off console work
 - Max **25 on-demand rotations** per key
 - Import token is valid for **24 hours**
 - Don't delete or expire old material while data still depends on it
@@ -29,8 +31,10 @@ I use a **custom AWS Config rule** (not the managed rotation rule). For each S3 
 - Checks `ListKeyRotations` for the last rotation date
 - Flags resources whose key wasn't rotated on time
 
-I aggregate across accounts and alert on non-compliant findings.
+I roll this out with a Config aggregator across accounts. CloudTrail on KMS encrypt/decrypt also shows which key material was used, which helps when proving rotation in practice.
 
 ## 4. Securing key material in transit
 
-I use the KMS import flow: wrap with the public key from `GetParametersForImport`, send only the encrypted blob over TLS. Plaintext key material never leaves the HSM.
+I use the KMS import flow: wrap with the public key from `GetParametersForImport`, send only the encrypted blob over TLS. Plaintext never leaves the HSM.
+
+I'd automate the ceremony where possible (HSM-side wrap job + least-privilege importer role calling KMS), keep the import token window short, and audit every import in CloudTrail.
