@@ -1,0 +1,1 @@
+# allianz-trade-skills-assessment
