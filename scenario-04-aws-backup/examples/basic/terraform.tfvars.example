@@ -1,0 +1,25 @@
+# Copy to terraform.tfvars and fill in real ARNs before apply.
+# This example is for review / local validation — not wired to a live account.
+
+name_prefix = "allianz-trade"
+
+primary_region   = "eu-central-1"
+secondary_region = "eu-west-1"
+
+# Optional: assume a role in the dedicated Backup account
+# backup_account_role_arn = "arn:aws:iam::111122223333:role/BackupAdmin"
+
+primary_vault_kms_key_arn       = "arn:aws:kms:eu-central-1:123456789012:key/00000000-0000-0000-0000-000000000001"
+secondary_vault_kms_key_arn     = "arn:aws:kms:eu-west-1:123456789012:key/00000000-0000-0000-0000-000000000002"
+cross_account_vault_kms_key_arn = "arn:aws:kms:eu-central-1:111122223333:key/00000000-0000-0000-0000-000000000003"
+
+selection_owner_tag_value = "owner@eulerhermes.com"
+
+backup_schedule_cron           = "cron(0 2 * * ? *)"
+backup_retention_days          = 120
+cross_region_retention_days    = 120
+cross_account_retention_days   = 180
+cold_storage_after_days        = 30
+vault_lock_min_retention_days  = 7
+vault_lock_max_retention_days  = 365
+vault_lock_changeable_for_days = 3
